@@ -1,32 +1,35 @@
 
 
-Allows a user to safely extract a Vec<&mut T> out of a Vec<*mut T> provided the vec is empty.
+Allows a user to safely convert between `Vec<A>` and `Vec<B>` provided the vec is empty is A and B have the same memory size and alignment.
 
 
 ```rust
 fn test() {
-    let mut v = VecStorage::new();
+    let v:Vec<*mut usize> = Vec::new();
 
-    {
-        let k = &[1usize, 2, 3, 4, 5];
+    assert_eq!(v.capacity(),0);
     
-        let j = v.as_borrow();
+    let k = &mut [5usize, 4, 3, 2, 1];
 
-        j.extend(k.iter());
+    let mut v2:Vec<&usize>=convert_empty_vec(v);
+    v2.extend(k.iter());
 
-        assert_eq!(*j[0], 1);
+    assert_eq!(*v2[0], 5);
 
-        j.clear();
-    }
+    v2.clear();
+    assert!(v2.capacity()>=5);
 
-    {
-        let k = &mut [5usize, 4, 3, 2, 1];
+
+    let mut v3:Vec<&mut usize>=convert_empty_vec(v2);
+    assert!(v3.capacity()>=5);
+
+
+    let k = &mut [5usize, 4, 3, 2, 1];
+
+    v3.extend(k.iter_mut());
+
+    assert_eq!(*v3[0], 5);
+
     
-        let j = v.as_borrow_mut();
-
-        j.extend(k.iter_mut());
-
-        assert_eq!(*j[0], 5);
-    }
 }
 ```

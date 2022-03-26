@@ -1,12 +1,12 @@
 [package]
 name = "revec"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["Ken <kenakioreed@gmail.com>"]
 edition = "2018"
 license = "MIT"
 repository = "https://github.com/tiby312/revec"
 
-description = "Extract Vec<&mut T> out of Vec<*mut T> provided vec is empty"
+description = "Convert a Vec<A> to a Vec<B> provided vec is empty"
 keywords = ["reuse","vec"]
 readme = "README.md"
 include = ["src/**/*", "LICENSE-MIT", "README.md"]

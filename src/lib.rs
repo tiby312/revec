@@ -1,87 +1,46 @@
-pub struct VecStorage<T> {
-    inner: Vec<*mut T>,
-}
-
 #[test]
 fn test() {
-    let mut v = VecStorage::new();
+    let v: Vec<*mut usize> = Vec::new();
 
-    {
-        let k = &[1usize, 2, 3, 4, 5];
+    assert_eq!(v.capacity(), 0);
 
-        let j = v.as_borrow();
+    let k = &mut [5usize, 4, 3, 2, 1];
 
-        j.extend(k.iter());
+    let mut v2: Vec<&usize> = convert_empty_vec(v);
+    v2.extend(k.iter());
 
-        assert_eq!(*j[0], 1);
+    assert_eq!(*v2[0], 5);
 
-        j.clear();
-    }
+    v2.clear();
+    assert!(v2.capacity() >= 5);
 
-    {
-        let k = &mut [5usize, 4, 3, 2, 1];
+    let mut v3: Vec<&mut usize> = convert_empty_vec(v2);
+    assert!(v3.capacity() >= 5);
 
-        let j = v.as_borrow_mut();
+    let k = &mut [5usize, 4, 3, 2, 1];
 
-        j.extend(k.iter_mut());
+    v3.extend(k.iter_mut());
 
-        assert_eq!(*j[0], 5);
-    }
+    assert_eq!(*v3[0], 5);
 }
 
-impl<T> Default for VecStorage<T> {
-    #[inline(always)]
-    #[must_use]
-    fn default() -> Self {
-        VecStorage::new()
-    }
-}
-impl<T> VecStorage<T> {
-    #[inline(always)]
-    #[must_use]
-    pub fn from_vec(inner: Vec<*mut T>) -> Self {
-        VecStorage { inner }
-    }
+///
+/// Convert an empty vec conserving capacity.
+/// The memory size and alignment of A and B must be equal.
+/// Panics if they are not.
+/// Panics if the specified vec is not empty.
+///
+pub fn convert_empty_vec<A, B>(vec: Vec<A>) -> Vec<B> {
+    assert!(std::mem::size_of::<A>() == std::mem::size_of::<B>());
+    assert!(std::mem::align_of::<A>() == std::mem::align_of::<B>());
+    assert!(vec.is_empty());
 
-    #[inline(always)]
-    #[must_use]
-    pub fn new() -> Self {
-        Self::from_vec(vec![])
-    }
-
-    #[inline(always)]
-    #[must_use]
-    pub fn as_borrow<'a, 'b>(&'a mut self) -> &'a mut Vec<&'b T> {
-        assert!(self.inner.is_empty());
-        unsafe { &mut *((&mut self.inner) as *mut _ as *mut _) }
-    }
-
-    #[inline(always)]
-    #[must_use]
-    pub fn as_borrow_mut<'a, 'b>(&'a mut self) -> &'a mut Vec<&'b mut T> {
-        assert!(self.inner.is_empty());
-        unsafe { &mut *((&mut self.inner) as *mut _ as *mut _) }
-    }
-
-    #[inline(always)]
-    #[must_use]
-    pub fn as_borrow_custom_ptr<K>(&mut self) -> &mut Vec<K> {
-        //Make const one day https://blog.rust-lang.org/2021/12/02/Rust-1.57.0.html
-        assert!(std::mem::size_of::<K>() == std::mem::size_of::<*mut T>());
-        assert!(std::mem::align_of::<K>() == std::mem::align_of::<*mut T>());
-        assert!(self.inner.is_empty());
-        unsafe { &mut *((&mut self.inner) as *mut _ as *mut _) }
-    }
-
-    #[inline(always)]
-    #[must_use]
-    pub fn as_inner(&mut self) -> &mut Vec<*mut T> {
-        &mut self.inner
-    }
-
-    #[inline(always)]
-    #[must_use]
-    pub fn into_inner(self) -> Vec<*mut T> {
-        self.inner
+    let mut v_clone = std::mem::ManuallyDrop::new(vec);
+    unsafe {
+        Vec::from_raw_parts(
+            v_clone.as_mut_ptr() as *mut B,
+            v_clone.len(),
+            v_clone.capacity(),
+        )
     }
 }
