@@ -8,7 +8,7 @@ fn test() {
 
     {
         let k = &[1usize, 2, 3, 4, 5];
-    
+
         let j = v.as_borrow();
 
         j.extend(k.iter());
@@ -20,7 +20,7 @@ fn test() {
 
     {
         let k = &mut [5usize, 4, 3, 2, 1];
-    
+
         let j = v.as_borrow_mut();
 
         j.extend(k.iter_mut());
