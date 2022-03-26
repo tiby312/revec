@@ -4,25 +4,28 @@ pub struct VecStorage<T> {
 
 #[test]
 fn test() {
-    let k = &mut [1usize, 2, 3, 4, 5];
     let mut v = VecStorage::new();
 
     {
+        let k = &[1usize, 2, 3, 4, 5];
+    
         let j = v.as_borrow();
 
         j.extend(k.iter());
 
-        assert_eq!(j[2], &3);
+        assert_eq!(*j[0], 1);
 
         j.clear();
     }
 
     {
+        let k = &mut [5usize, 4, 3, 2, 1];
+    
         let j = v.as_borrow_mut();
 
         j.extend(k.iter_mut());
 
-        assert_eq!(j[2], &3);
+        assert_eq!(*j[0], 5);
     }
 }
 
