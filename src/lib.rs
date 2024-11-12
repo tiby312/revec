@@ -31,8 +31,9 @@ fn test() {
 /// Panics if the specified vec is not empty.
 ///
 pub fn convert_empty_vec<A, B>(vec: Vec<A>) -> Vec<B> {
-    assert!(std::mem::size_of::<A>() == std::mem::size_of::<B>());
-    assert!(std::mem::align_of::<A>() == std::mem::align_of::<B>());
+    
+    const{ assert!(std::mem::size_of::<A>() == std::mem::size_of::<B>())};
+    const{ assert!(std::mem::align_of::<A>() == std::mem::align_of::<B>())};
     assert!(vec.is_empty());
 
     let mut v_clone = std::mem::ManuallyDrop::new(vec);
